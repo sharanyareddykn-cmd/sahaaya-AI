@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block title %}
+Login
+{% endblock %}
+
+
+{% block content %}
+
+
+<div class="card"
+     style="max-width:500px;margin:60px auto;">
+
+    <h1>
+        Login
+    </h1>
+
+    <p>
+        Login to your SAHAAYA AI account.
+    </p>
+
+
+    <form method="POST"
+          class="form">
+
+
+        <label>
+
+            Email
+
+            <input
+                type="email"
+                name="email"
+                required
+            >
+
+        </label>
+
+
+        <label>
+
+            Password
+
+            <input
+                type="password"
+                name="password"
+                required
+            >
+
+        </label>
+
+
+        <button
+            class="btn"
+            type="submit">
+
+            Login
+
+        </button>
+
+
+    </form>
+
+
+    <hr>
+
+
+    <p>
+        <b>Demo Admin:</b><br>
+        admin@sahaaya.local<br>
+        Admin@123
+    </p>
+
+
+    <p>
+        <b>Demo NGO:</b><br>
+        ngo@sahaaya.local<br>
+        Ngo@123
+    </p>
+
+
+</div>
+
+
+{% endblock %}

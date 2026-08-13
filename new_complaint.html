@@ -1,0 +1,237 @@
+{% extends "base.html" %}
+
+{% block title %}
+Report Issue
+{% endblock %}
+
+
+{% block content %}
+
+
+<div class="card"
+     style="max-width:800px;margin:40px auto;">
+
+    <h1>
+        Report a Community Issue
+    </h1>
+
+    <p>
+        SAHAAYA AI will analyze your complaint
+        and generate a priority recommendation.
+    </p>
+
+
+    <form
+        method="POST"
+        class="form">
+
+
+        <label>
+
+            Issue Title
+
+            <input
+                type="text"
+                name="title"
+                placeholder="Example: Water pipeline leaking"
+                required
+            >
+
+        </label>
+
+
+        <label>
+
+            Category
+
+            <select name="category">
+
+                <option value="Other">
+                    Let AI Detect
+                </option>
+
+
+                {% for category in categories %}
+
+                <option value="{{ category }}">
+
+                    {{ category }}
+
+                </option>
+
+                {% endfor %}
+
+            </select>
+
+        </label>
+
+
+        <label>
+
+            Problem Description
+
+            <textarea
+                name="description"
+                rows="6"
+                placeholder="Explain the problem..."
+                required
+            ></textarea>
+
+        </label>
+
+
+        <label>
+
+            Ward / Area
+
+            <input
+                type="text"
+                name="ward"
+            >
+
+        </label>
+
+
+        <label>
+
+            How many days has the issue existed?
+
+            <input
+                type="number"
+                name="duration_days"
+                value="1"
+                min="0"
+            >
+
+        </label>
+
+
+        <label>
+
+            Approximate people affected
+
+            <input
+                type="number"
+                name="affected_people"
+                value="1"
+                min="0"
+            >
+
+        </label>
+
+
+        <label>
+
+            Latitude
+
+            <input
+                type="text"
+                id="latitude"
+                name="latitude"
+            >
+
+        </label>
+
+
+        <label>
+
+            Longitude
+
+            <input
+                type="text"
+                id="longitude"
+                name="longitude"
+            >
+
+        </label>
+
+
+        <button
+            type="button"
+            class="btn"
+            onclick="getLocation()">
+
+            📍 Get My Location
+
+        </button>
+
+
+        <small id="locationMessage"></small>
+
+
+        <button
+            class="btn"
+            type="submit">
+
+            Submit Complaint & Analyze
+
+        </button>
+
+
+    </form>
+
+</div>
+
+
+<script>
+
+function getLocation() {
+
+    const message =
+        document.getElementById(
+            "locationMessage"
+        );
+
+
+    if (!navigator.geolocation) {
+
+        message.innerText =
+            "Location is not supported.";
+
+        return;
+    }
+
+
+    message.innerText =
+        "Getting your location...";
+
+
+    navigator.geolocation.getCurrentPosition(
+
+        function(position) {
+
+            document.getElementById(
+                "latitude"
+            ).value =
+                position.coords.latitude
+                .toFixed(6);
+
+
+            document.getElementById(
+                "longitude"
+            ).value =
+                position.coords.longitude
+                .toFixed(6);
+
+
+            message.innerText =
+                "Location captured.";
+
+        },
+
+
+        function() {
+
+            message.innerText =
+                "Unable to get location.";
+
+        }
+
+    );
+
+}
+
+</script>
+
+
+{% endblock %}
