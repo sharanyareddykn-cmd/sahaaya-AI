@@ -1,0 +1,261 @@
+{% extends "base.html" %}
+
+{% block title %}
+Dashboard
+{% endblock %}
+
+
+{% block content %}
+
+
+<div style="padding-top:40px;">
+
+    <h1>
+        Welcome, {{ session.get("name") }}
+    </h1>
+
+
+    <p>
+
+        Role:
+        <b>{{ session.get("role") }}</b>
+
+        {% if session.get("role") == "citizen" %}
+
+        <br>
+
+        Citizen ID:
+        <b>{{ session.get("citizen_id") }}</b>
+
+        {% endif %}
+
+    </p>
+
+</div>
+
+
+<div style="
+display:grid;
+grid-template-columns:
+repeat(4,1fr);
+gap:15px;
+">
+
+
+    <div class="card">
+
+        <h4>
+            Total Complaints
+        </h4>
+
+        <h1>
+            {{ total }}
+        </h1>
+
+    </div>
+
+
+    <div class="card">
+
+        <h4>
+            High Priority
+        </h4>
+
+        <h1>
+            {{ high }}
+        </h1>
+
+    </div>
+
+
+    <div class="card">
+
+        <h4>
+            Pending
+        </h4>
+
+        <h1>
+            {{ pending }}
+        </h1>
+
+    </div>
+
+
+    <div class="card">
+
+        <h4>
+            Resolved
+        </h4>
+
+        <h1>
+            {{ resolved }}
+        </h1>
+
+    </div>
+
+
+</div>
+
+
+{% if session.get("role") == "citizen" %}
+
+<div style="margin:25px 0;">
+
+    <a
+        class="btn"
+        href="{{ url_for('new_complaint') }}">
+
+        + Report New Issue
+
+    </a>
+
+</div>
+
+{% endif %}
+
+
+<div class="card">
+
+    <h2>
+        Complaints
+    </h2>
+
+
+    {% if complaints %}
+
+
+    <div style="overflow-x:auto;">
+
+        <table
+            style="
+            width:100%;
+            border-collapse:collapse;
+            "
+        >
+
+            <tr>
+
+                <th
+                    style="padding:12px;">
+                    Complaint ID
+                </th>
+
+                <th
+                    style="padding:12px;">
+                    Issue
+                </th>
+
+                <th
+                    style="padding:12px;">
+                    Category
+                </th>
+
+                <th
+                    style="padding:12px;">
+                    Priority
+                </th>
+
+                <th
+                    style="padding:12px;">
+                    Status
+                </th>
+
+                <th
+                    style="padding:12px;">
+                    Action
+                </th>
+
+            </tr>
+
+
+            {% for complaint in complaints %}
+
+
+            <tr>
+
+                <td style="padding:12px;">
+
+                    <b>
+                        {{ complaint["complaint_id"] }}
+                    </b>
+
+                </td>
+
+
+                <td style="padding:12px;">
+
+                    {{ complaint["title"] }}
+
+                </td>
+
+
+                <td style="padding:12px;">
+
+                    {{ complaint["ai_category"] }}
+
+                </td>
+
+
+                <td style="padding:12px;">
+
+                    <b>
+
+                        {{
+                            complaint["human_priority"]
+                            or
+                            complaint["ai_priority"]
+                        }}
+
+                    </b>
+
+                </td>
+
+
+                <td style="padding:12px;">
+
+                    {{ complaint["status"] }}
+
+                </td>
+
+
+                <td style="padding:12px;">
+
+                    <a
+                        href="{{
+                            url_for(
+                                'complaint_detail',
+                                complaint_id=
+                                complaint['complaint_id']
+                            )
+                        }}">
+
+                        View
+
+                    </a>
+
+                </td>
+
+            </tr>
+
+
+            {% endfor %}
+
+
+        </table>
+
+    </div>
+
+
+    {% else %}
+
+    <p>
+        No complaints found.
+    </p>
+
+    {% endif %}
+
+
+</div>
+
+
+{% endblock %}
