@@ -1,0 +1,482 @@
+{% extends "base.html" %}
+
+{% block title %}
+Complaint Details
+{% endblock %}
+
+
+{% block content %}
+
+
+<div style="padding-top:40px;">
+
+    <h1>
+        {{ complaint["complaint_id"] }}
+    </h1>
+
+    <p>
+        {{ complaint["title"] }}
+    </p>
+
+</div>
+
+
+<div class="card">
+
+    <h2>
+        Citizen Information
+    </h2>
+
+
+    <p>
+
+        <b>Citizen Name:</b>
+
+        {{ complaint["citizen_name"] }}
+
+    </p>
+
+
+    <p>
+
+        <b>Citizen ID:</b>
+
+        {{ complaint["citizen_id"] }}
+
+    </p>
+
+
+    <p>
+
+        <b>Email:</b>
+
+        {{ complaint["citizen_email"] }}
+
+    </p>
+
+
+    <p>
+
+        <b>Phone:</b>
+
+        {{ complaint["citizen_phone"] }}
+
+    </p>
+
+
+    <p>
+
+        <b>Ward:</b>
+
+        {{ complaint["ward"] }}
+
+    </p>
+
+</div>
+
+
+<div class="card">
+
+    <h2>
+        Complaint
+    </h2>
+
+
+    <p>
+
+        <b>Title:</b>
+
+        {{ complaint["title"] }}
+
+    </p>
+
+
+    <p>
+
+        <b>Description:</b>
+
+    </p>
+
+
+    <p>
+        {{ complaint["description"] }}
+    </p>
+
+
+    <p>
+
+        <b>Category:</b>
+
+        {{ complaint["ai_category"] }}
+
+    </p>
+
+
+    <p>
+
+        <b>Duration:</b>
+
+        {{ complaint["duration_days"] }}
+        day(s)
+
+    </p>
+
+
+    <p>
+
+        <b>People Affected:</b>
+
+        {{ complaint["affected_people"] }}
+
+    </p>
+
+
+    <p>
+
+        <b>Status:</b>
+
+        {{ complaint["status"] }}
+
+    </p>
+
+</div>
+
+
+<div class="card">
+
+    <h2>
+        🤖 AI Analysis
+    </h2>
+
+
+    <p>
+
+        <b>AI Category:</b>
+
+        {{ complaint["ai_category"] }}
+
+    </p>
+
+
+    <p>
+
+        <b>Severity:</b>
+
+        {{ complaint["ai_severity"] }}
+
+    </p>
+
+
+    <p>
+
+        <b>Urgency:</b>
+
+        {{ complaint["ai_urgency"] }}
+
+    </p>
+
+
+    <p>
+
+        <b>AI Priority:</b>
+
+        {{ complaint["ai_priority"] }}
+
+    </p>
+
+
+    <p>
+
+        <b>Confidence:</b>
+
+        {{
+            (
+                complaint["ai_confidence"] * 100
+            )|round
+        }}%
+
+    </p>
+
+
+    <p>
+
+        <b>SDG Mapping:</b>
+
+        {{ complaint["ai_sdg"] }}
+
+    </p>
+
+
+    <div
+        style="
+        background:#eef5ff;
+        padding:15px;
+        border-radius:10px;
+        ">
+
+        <b>
+            Why did AI give this priority?
+        </b>
+
+        <p>
+            {{ complaint["ai_reason"] }}
+        </p>
+
+    </div>
+
+
+</div>
+
+
+{% if session.get("role")
+   in ["admin", "ngo"] %}
+
+
+<div class="card">
+
+    <h2>
+        Human Verification
+    </h2>
+
+
+    <form
+        method="POST"
+        action="{{
+            url_for(
+                'verify_complaint',
+                complaint_id=
+                complaint['complaint_id']
+            )
+        }}"
+        class="form">
+
+
+        <label>
+
+            Final Priority
+
+            <select
+                name="human_priority">
+
+                <option value="HIGH">
+                    HIGH
+                </option>
+
+                <option value="MEDIUM">
+                    MEDIUM
+                </option>
+
+                <option value="LOW">
+                    LOW
+                </option>
+
+            </select>
+
+        </label>
+
+
+        <label>
+
+            Verification Note
+
+            <textarea
+                name="admin_note"
+                rows="4"
+            ></textarea>
+
+        </label>
+
+
+        <button
+            class="btn"
+            type="submit">
+
+            Verify Complaint
+
+        </button>
+
+
+    </form>
+
+</div>
+
+
+<div class="card">
+
+    <h2>
+        Update Complaint Status
+    </h2>
+
+
+    <form
+        method="POST"
+        action="{{
+            url_for(
+                'update_status',
+                complaint_id=
+                complaint['complaint_id']
+            )
+        }}"
+        class="form">
+
+
+        <select name="status">
+
+            {% for status in statuses %}
+
+            <option
+                value="{{ status }}"
+                {% if complaint["status"]
+                   == status %}
+                selected
+                {% endif %}
+            >
+
+                {{ status }}
+
+            </option>
+
+            {% endfor %}
+
+        </select>
+
+
+        <input
+            type="text"
+            name="note"
+            placeholder="Action note"
+        >
+
+
+        <button
+            class="btn"
+            type="submit">
+
+            Update Status
+
+        </button>
+
+
+    </form>
+
+</div>
+
+
+{% endif %}
+
+
+<div class="card">
+
+    <h2>
+        Complaint History
+    </h2>
+
+
+    {% for item in history %}
+
+    <div
+        style="
+        padding:15px;
+        border-bottom:
+        1px solid #ddd;
+        ">
+
+        <b>
+            {{ item["new_status"] }}
+        </b>
+
+        <br>
+
+        {{ item["created_at"] }}
+
+        {% if item["note"] %}
+
+        <p>
+            {{ item["note"] }}
+        </p>
+
+        {% endif %}
+
+    </div>
+
+    {% endfor %}
+
+
+</div>
+
+
+{% if session.get("role")
+   == "citizen"
+   and complaint["status"]
+   in ["Resolved", "Closed"] %}
+
+
+<div class="card">
+
+    <h2>
+        Give Feedback
+    </h2>
+
+
+    <form
+        method="POST"
+        action="{{
+            url_for(
+                'feedback',
+                complaint_id=
+                complaint['complaint_id']
+            )
+        }}"
+        class="form">
+
+
+        <select name="rating">
+
+            <option value="5">
+                ⭐⭐⭐⭐⭐ Excellent
+            </option>
+
+            <option value="4">
+                ⭐⭐⭐⭐ Very Good
+            </option>
+
+            <option value="3">
+                ⭐⭐⭐ Good
+            </option>
+
+            <option value="2">
+                ⭐⭐ Needs Improvement
+            </option>
+
+            <option value="1">
+                ⭐ Poor
+            </option>
+
+        </select>
+
+
+        <textarea
+            name="comment"
+            rows="4"
+            placeholder="Your feedback..."
+        ></textarea>
+
+
+        <button
+            class="btn"
+            type="submit">
+
+            Submit Feedback
+
+        </button>
+
+
+    </form>
+
+</div>
+
+
+{% endif %}
+
+
+{% endblock %}
