@@ -1469,6 +1469,100 @@ def complaint_detail(complaint_id):
 
 
 # =========================================================
+# VERIFY COMPLAINT
+# =========================================================
+
+@app.route(
+    "/complaint/<complaint_id>/verify",
+    methods=["POST"]
+)
+@role_required("admin", "ngo")
+def verify_complaint(complaint_id):
+
+    connection = get_db()
+
+
+    complaint = connection.execute(
+        """
+        SELECT *
+        FROM complaints
+        WHERE complaint_id = ?
+        """,
+        (complaint_id,)
+    ).fetchone()
+
+
+    if not complaint:
+
+        connection.close()
+
+        flash(
+            "Complaint not found.",
+            "danger"
+        )
+
+        return redirect(
+            url_for("dashboard")
+        )
+
+
+    old_status = complaint["status"]
+
+
+    connection.execute(
+        """
+        UPDATE complaints
+        SET
+            status = ?,
+            updated_at = ?
+        WHERE complaint_id = ?
+        """,
+        (
+            "Verified",
+            current_time(),
+            complaint_id
+        )
+    )
+
+
+    connection.commit()
+
+    connection.close()
+
+
+    if old_status != "Verified":
+
+        add_history(
+            complaint_id,
+
+            old_status,
+
+            "Verified",
+
+            session.get(
+                "citizen_id",
+                "STAFF"
+            ),
+
+            "Complaint verified by authorized staff."
+        )
+
+
+    flash(
+        "Complaint verified successfully.",
+        "success"
+    )
+
+
+    return redirect(
+        url_for(
+            "complaint_detail",
+            complaint_id=complaint_id
+        )
+    )
+
+
+# =========================================================
 # UPDATE COMPLAINT
 # =========================================================
 
@@ -1827,4 +1921,4 @@ if __name__ == "__main__":
         host="127.0.0.1",
         port=5000,
         debug=True
-    )
+    ) 
