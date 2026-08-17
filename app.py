@@ -719,10 +719,6 @@ def register():
         )
 
 
-        # -------------------------------------------------
-        # VALIDATION
-        # -------------------------------------------------
-
         if (
             not name
             or not email
@@ -750,10 +746,6 @@ def register():
                 url_for("register")
             )
 
-
-        # -------------------------------------------------
-        # DATABASE
-        # -------------------------------------------------
 
         connection = get_db()
 
@@ -796,10 +788,6 @@ def register():
         )
 
 
-        # -------------------------------------------------
-        # CREATE USER
-        # -------------------------------------------------
-
         connection.execute(
             """
             INSERT INTO users
@@ -833,10 +821,6 @@ def register():
         connection.close()
 
 
-        # -------------------------------------------------
-        # SUCCESS MESSAGE
-        # -------------------------------------------------
-
         flash(
             f"Registration successful! "
             f"Your Citizen ID is {citizen_id}",
@@ -844,18 +828,10 @@ def register():
         )
 
 
-        # -------------------------------------------------
-        # REDIRECT TO LOGIN
-        # -------------------------------------------------
-
         return redirect(
             url_for("login")
         )
 
-
-    # -----------------------------------------------------
-    # GET REQUEST
-    # -----------------------------------------------------
 
     return render_template(
         "register.html"
@@ -912,17 +888,11 @@ def login():
 
             session.clear()
 
-
             session["user_id"] = user["id"]
-
             session["citizen_id"] = user["citizen_id"]
-
             session["name"] = user["name"]
-
             session["role"] = user["role"]
-
             session["email"] = user["email"]
-
             session["ward"] = user["ward"]
 
 
@@ -1168,10 +1138,6 @@ def new_complaint():
         )
 
 
-        # -------------------------------------------------
-        # VALIDATION
-        # -------------------------------------------------
-
         if not title:
 
             flash(
@@ -1211,10 +1177,6 @@ def new_complaint():
             category = "Other"
 
 
-        # -------------------------------------------------
-        # CREATE COMPLAINT
-        # -------------------------------------------------
-
         connection = get_db()
 
 
@@ -1231,10 +1193,6 @@ def new_complaint():
             number
         )
 
-
-        # -------------------------------------------------
-        # AI ANALYSIS
-        # -------------------------------------------------
 
         result = analyze_complaint(
             description,
@@ -1280,43 +1238,24 @@ def new_complaint():
             """,
             (
                 complaint_id,
-
                 session["citizen_id"],
-
                 title,
-
                 description,
-
                 category,
-
                 ward,
-
                 latitude,
-
                 longitude,
-
                 duration,
-
                 affected,
-
                 "AI Analyzed",
-
                 result["category"],
-
                 result["severity"],
-
                 result["urgency"],
-
                 result["priority"],
-
                 result["sdg"],
-
                 result["reason"],
-
                 result["confidence"],
-
                 timestamp,
-
                 timestamp
             )
         )
@@ -1327,26 +1266,14 @@ def new_complaint():
         connection.close()
 
 
-        # -------------------------------------------------
-        # HISTORY
-        # -------------------------------------------------
-
         add_history(
             complaint_id,
-
             "Submitted",
-
             "AI Analyzed",
-
             session["citizen_id"],
-
             "AI analysis completed."
         )
 
-
-        # -------------------------------------------------
-        # SUCCESS MESSAGE
-        # -------------------------------------------------
 
         flash(
             f"Complaint {complaint_id} submitted successfully. "
@@ -1471,10 +1398,18 @@ def complaint_detail(complaint_id):
 # =========================================================
 # VERIFY COMPLAINT
 # =========================================================
+# THIS ROUTE FIXES THE RENDER ERROR:
+#
+# complaint_detail.html is calling:
+#
+# url_for("verify_complaint", complaint_id=...)
+#
+# The old app.py did not have this endpoint.
+# =========================================================
 
 @app.route(
     "/complaint/<complaint_id>/verify",
-    methods=["POST"]
+    methods=["GET", "POST"]
 )
 @role_required("admin", "ngo")
 def verify_complaint(complaint_id):
@@ -1509,6 +1444,31 @@ def verify_complaint(complaint_id):
     old_status = complaint["status"]
 
 
+    # -----------------------------------------------------
+    # If already verified, do not create duplicate history
+    # -----------------------------------------------------
+
+    if old_status == "Verified":
+
+        connection.close()
+
+        flash(
+            "This complaint is already verified.",
+            "info"
+        )
+
+        return redirect(
+            url_for(
+                "complaint_detail",
+                complaint_id=complaint_id
+            )
+        )
+
+
+    # -----------------------------------------------------
+    # Update complaint status
+    # -----------------------------------------------------
+
     connection.execute(
         """
         UPDATE complaints
@@ -1530,22 +1490,20 @@ def verify_complaint(complaint_id):
     connection.close()
 
 
-    if old_status != "Verified":
+    # -----------------------------------------------------
+    # Add history entry
+    # -----------------------------------------------------
 
-        add_history(
-            complaint_id,
-
-            old_status,
-
-            "Verified",
-
-            session.get(
-                "citizen_id",
-                "STAFF"
-            ),
-
-            "Complaint verified by authorized staff."
-        )
+    add_history(
+        complaint_id,
+        old_status,
+        "Verified",
+        session.get(
+            "citizen_id",
+            "STAFF"
+        ),
+        "Complaint verified by staff."
+    )
 
 
     flash(
@@ -1638,13 +1596,9 @@ def update_complaint(complaint_id):
         """,
         (
             new_status,
-
             human_priority or None,
-
             admin_note or None,
-
             current_time(),
-
             complaint_id
         )
     )
@@ -1659,16 +1613,12 @@ def update_complaint(complaint_id):
 
         add_history(
             complaint_id,
-
             old_status,
-
             new_status,
-
             session.get(
                 "citizen_id",
                 "STAFF"
             ),
-
             admin_note
         )
 
@@ -1795,13 +1745,9 @@ def submit_feedback(complaint_id):
         """,
         (
             complaint_id,
-
             session["citizen_id"],
-
             rating,
-
             comment,
-
             current_time()
         )
     )
@@ -1921,4 +1867,4 @@ if __name__ == "__main__":
         host="127.0.0.1",
         port=5000,
         debug=True
-    ) 
+    )
