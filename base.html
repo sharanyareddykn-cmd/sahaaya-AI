@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>
+        {% block title %}
+        SAHAAYA AI
+        {% endblock %}
+    </title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f5f7fb;
+            color: #172033;
+        }
+
+        nav {
+            background: #101827;
+            padding: 18px 6%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            margin-left: 18px;
+        }
+
+        .logo {
+            font-size: 22px;
+            font-weight: bold;
+        }
+
+        .logo span {
+            color: #60a5fa;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1150px;
+            margin: auto;
+            min-height: 85vh;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 11px 17px;
+            border-radius: 8px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            text-decoration: none;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            margin: 20px 0;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,.05);
+        }
+
+        .form {
+            display: grid;
+            gap: 15px;
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #d7dce5;
+            border-radius: 8px;
+            margin-top: 5px;
+        }
+
+        label {
+            font-weight: bold;
+        }
+
+        .flash {
+            margin-top: 20px;
+            padding: 13px;
+            border-radius: 8px;
+        }
+
+        .success {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .danger {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        footer {
+            text-align: center;
+            padding: 25px;
+            background: #101827;
+            color: white;
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<nav>
+
+    <a class="logo"
+       href="{{ url_for('index') }}">
+
+        SAHAAYA
+        <span>AI</span>
+
+    </a>
+
+
+    <div>
+
+        <a href="{{ url_for('index') }}">
+            Home
+        </a>
+
+
+        {% if session.get("user_id") %}
+
+            <a href="{{ url_for('dashboard') }}">
+                Dashboard
+            </a>
+
+
+            {% if session.get("role") == "citizen" %}
+
+                <a href="{{ url_for('new_complaint') }}">
+                    Report Issue
+                </a>
+
+            {% endif %}
+
+
+            <a href="{{ url_for('logout') }}">
+                Logout
+            </a>
+
+        {% else %}
+
+            <a href="{{ url_for('login') }}">
+                Login
+            </a>
+
+            <a href="{{ url_for('register') }}">
+                Register
+            </a>
+
+        {% endif %}
+
+    </div>
+
+</nav>
+
+
+<div class="container">
+
+
+    {% with messages =
+        get_flashed_messages(
+            with_categories=true
+        )
+    %}
+
+        {% for category, message in messages %}
+
+            <div class="flash {{ category }}">
+
+                {{ message }}
+
+            </div>
+
+        {% endfor %}
+
+    {% endwith %}
+
+
+    {% block content %}
+
+    {% endblock %}
+
+
+</div>
+
+
+<footer>
+
+    SAHAAYA AI © 2026
+
+</footer>
+
+
+</body>
+
+</html>
